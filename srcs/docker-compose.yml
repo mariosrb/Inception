@@ -1,0 +1,67 @@
+services:    # differents services (images)
+
+# --- La data base (mariaDB)
+  mariadb:
+    container_name: mariadb
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception
+    restart: on-failure
+
+# --- Le site internet (wordpress) ---
+  wordpress:
+    container_name: wordpress
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - wordpress_data:/var/www/wordpress
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    restart: on-failure
+
+# --- Le gardien la securite (NGINX) ---
+  nginx:
+    container_name: nginx
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/wordpress
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    restart: on-failure
+
+volumes:
+  wordpress_data:
+    driver: local # on stocke le volume en local
+    driver_opts:
+      type: 'none'
+      o: 'bind' # --> Ne cree pas un nouveau systeme de fichier, fait un 'miroir' (bind mount) dun dossier existant
+      device: /home/mariosrb/data/wordpress
+  mariadb_data:
+    driver: local # on stocke le volume en local
+    driver_opts:
+      type: 'none'
+      o: 'bind' # --> Ne cree pas un nouveau systeme de fichier, fait un 'miroir' (bind mount) dun dossier existant
+      device: /home/mariosrb/data/mariadb
+
+networks:
+  inception:
+    driver: bridge
