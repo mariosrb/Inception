@@ -32,6 +32,30 @@ services:    # differents services (images)
       - mariadb
     restart: on-failure
 
+# --- Bonus : Redis Cache ---
+  redis:
+    image: bonus-redis:42
+    container_name: redis
+    build:
+      context: ./requirements/bonus/redis
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    restart: always
+
+# --- Bonus : Static Website ---
+  website:
+    image: bonus-website:42
+    container_name: website
+    build:
+      context: ./requirements/bonus/website
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    restart: on-failure
+
 # --- Le gardien la securite (NGINX) ---
   nginx:
     image: nginx:42
