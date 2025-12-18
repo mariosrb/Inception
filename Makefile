@@ -15,6 +15,7 @@ up:
 bonus:
 	@mkdir -p $(DATA_PATH)/wordpress
 	@mkdir -p $(DATA_PATH)/mariadb
+	@mkdir -p $(DATA_PATH)/portainer
 	@$(DOCKER_COMPOSE_BONUS) up -d --build
 
 down:

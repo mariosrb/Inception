@@ -67,6 +67,22 @@ services:    # differents services (images)
       - inception
     restart: on-failure
 
+# --- Bonus : Portainer ---
+  portainer:
+    image: bonus-portainer:42
+    container_name: portainer
+    build:
+      context: ./requirements/bonus/portainer
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Donner acces au docker a la VM
+      - portainer_data:/data
+    networks:
+      - inception
+    restart: on-failure
+
 # --- Le gardien la securite (NGINX) ---
   nginx:
     image: nginx:42
@@ -99,6 +115,12 @@ volumes:
       type: 'none'
       o: 'bind' # --> Ne cree pas un nouveau systeme de fichier, fait un 'miroir' (bind mount) dun dossier existant
       device: /home/mariosrb/data/mariadb
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: /home/mariosrb/data/portainer
 
 networks:
   inception:
