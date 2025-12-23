@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Arrête le script si une commande échoue
+# Arrete le script si une commande échoue
 set -e
 
 # Se placer dans le dossier du site
@@ -12,7 +12,7 @@ while ! mysqladmin ping -h"mariadb" --silent; do
 done
 echo "MariaDB is connected !"
 
-# --- INSTALLATION DE WORDPRESS ---
+# --- Wordpress installation ---
 if [ ! -f /var/www/wordpress/wp-config.php ]; then
     echo "WordPress is not installed. Installing now..."
 
@@ -45,23 +45,27 @@ else
     echo "WordPress is already installed."
 fi
 
-# --- BONUS : REDIS CACHE ---
-# On le met ici pour qu'il s'installe même si WP existe déjà
-echo "Configuring Redis Cache..."
+# --- bonus --> redis cache que si bonus ---
+# on verifie sil existe sur le reseau
+if getent hosts redis > /dev/null 2>&1; then
+	echo "Redis containeur found, configuring Redis Cache..."
 
-# Installer et activer le plugin
-wp plugin install redis-cache --activate --allow-root
+	# Installer et activer le plugin
+	wp plugin install redis-cache --activate --allow-root
 
-# Configurer les variables de connexion (Host = nom du service docker)
-wp config set WP_REDIS_HOST redis --allow-root
-wp config set WP_REDIS_PORT 6379 --raw --allow-root
+	# Configurer les variables de connexion (Host = nom du service docker)
+	wp config set WP_REDIS_HOST redis --allow-root
+	wp config set WP_REDIS_PORT 6379 --raw --allow-root
 
-# Activer le fichier object-cache.php
-wp redis enable --allow-root
+	# Activer le fichier object-cache.php
+	wp redis enable --allow-root
+else
+	echo "Redis not found, skipping for mandatory"
+fi
 
-# --- DROITS D'ACCÈS ---
+# --- droits dacces ---
 echo "Setting permissions..."
-# On rend les fichiers à l'utilisateur de NGINX/PHP
+# On rend les fichiers à lutilisateur de NGINX/PHP
 chown -R www-data:www-data /var/www/wordpress
 
 echo "Starting PHP-FPM..."
