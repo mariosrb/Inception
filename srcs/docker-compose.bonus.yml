@@ -83,6 +83,24 @@ services:    # differents services (images)
       - inception
     restart: on-failure
 
+# --- Bonus : FTP ---
+  ftp:
+    image: bonus-ftp:42
+    container_name: ftp
+    build:
+      context: ./requirements/bonus/ftp
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - wordpress_data:/var/www/wordpress
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    networks:
+      - inception
+    restart: on-failure
+
 # --- Le gardien la securite (NGINX) ---
   nginx:
     image: nginx:42
